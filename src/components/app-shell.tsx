@@ -16,14 +16,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+const NAV: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/email", label: "Email Generator", icon: Mail },
   { to: "/meetings", label: "Meeting Summarizer", icon: FileText },
   { to: "/tasks", label: "Task Planner", icon: ListChecks },
   { to: "/research", label: "Research Assistant", icon: Search },
   { to: "/chat", label: "AI Chatbot", icon: MessageSquare },
-] as const;
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);

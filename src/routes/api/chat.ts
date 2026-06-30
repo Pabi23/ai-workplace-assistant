@@ -61,11 +61,8 @@ export const Route = createFileRoute("/api/chat")({
             thread_id: threadId,
             user_id: userId,
             role: "user",
-            parts: lastUser.parts as unknown as object,
+            parts: lastUser.parts as never,
           });
-          // suppress unused
-          void lastSavedTime;
-        }
 
         // Auto-title from first user message
         const userMsgCount = messages.filter((m) => m.role === "user").length;
