@@ -45,24 +45,17 @@ export const Route = createFileRoute("/api/chat")({
           .maybeSingle();
         if (!thread) return new Response("Thread not found", { status: 404 });
 
-        // Persist the latest user message (only if not already saved)
+        // Persist the latest user message
         const lastUser = [...messages].reverse().find((m) => m.role === "user");
         if (lastUser) {
-          const { data: existing } = await supabase
-            .from("chat_messages")
-            .select("id")
-            .eq("thread_id", threadId)
-            .eq("role", "user")
-            .order("created_at", { ascending: false })
-            .limit(1);
-          const lastSavedTime = existing?.[0]?.id;
-          // simple approach: always insert latest user msg
           await supabase.from("chat_messages").insert({
             thread_id: threadId,
             user_id: userId,
             role: "user",
             parts: lastUser.parts as never,
           });
+        }
+
 
         // Auto-title from first user message
         const userMsgCount = messages.filter((m) => m.role === "user").length;
@@ -90,7 +83,7 @@ export const Route = createFileRoute("/api/chat")({
               thread_id: threadId,
               user_id: userId,
               role: "assistant",
-              parts: responseMessage.parts as unknown as object,
+              parts: responseMessage.parts as never,
             });
             await supabase
               .from("chat_threads")
