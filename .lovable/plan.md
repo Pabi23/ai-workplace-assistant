@@ -1,63 +1,38 @@
-# AI Workplace Productivity Assistant
+# AI Workplace Productivity Assistant — Build
 
-A clean Notion-style SaaS app with five AI-powered tools, email/password auth, and per-user persistence via Lovable Cloud.
+The scaffold, database, auth middleware, AI gateway, server functions, chat streaming route, and shell components are already in place. This plan finishes the remaining UI so the app is fully usable.
 
-## Stack & setup
-- Enable Lovable Cloud (Supabase) for auth + database
-- Lovable AI Gateway (`google/gemini-3-flash-preview`) for all AI calls
-- AI SDK + AI Elements for chat surface
+## Remaining work
 
-## Auth
-- Email/password sign-in/sign-up at `/auth`
-- Protected app routes under `_authenticated/`
-- Sign-out in sidebar
+**Auth & layout**
+- `src/routes/auth.tsx` — email/password sign-in + sign-up (tabbed), redirects to `/` on success.
+- Confirm `src/routes/_authenticated/route.tsx` gate + `AppShell` wrap (already present).
 
-## Layout
-- Collapsible sidebar (shadcn) with: Dashboard, Email Generator, Meeting Summarizer, Task Planner, Research Assistant, Chatbot
-- Top bar with sign-out
-- Responsible-AI disclaimer footer on every tool page
+**Dashboard** (`_authenticated/index.tsx`)
+- Greeting with user email, grid of 5 tool cards (icon, name, description, link), recent activity from `listGenerations`.
 
-## Pages
+**Tool pages** — one per tool, all using a shared `ToolWorkbench` pattern:
+- `email.tsx` — inputs: recipient, tone (select), purpose, key points (textarea).
+- `meetings.tsx` — input: notes (large textarea).
+- `tasks.tsx` — inputs: goal, deadline, context.
+- `research.tsx` — inputs: topic, depth (select), focus questions.
 
-**Dashboard (`/`)** — Greeting, grid of 5 tool cards with descriptions, recent activity list.
+Each page: form on the left, editable markdown output on the right with Copy / Save-edit / Delete, history list below, persistent Responsible-AI disclaimer footer.
 
-**Smart Email Generator (`/email`)** — Form: recipient, tone (professional/friendly/concise/persuasive), purpose, key points. Generates editable email (subject + body in textarea). Copy/save buttons. History list.
+**Chat**
+- `_authenticated/chat/route.tsx` — two-pane layout with thread list sidebar (list/create/rename/delete via `chat-threads.functions`), Outlet on right.
+- `_authenticated/chat/index.tsx` — empty state that creates a new thread and navigates to it.
+- `_authenticated/chat/$threadId.tsx` — already implemented (AI SDK `useChat`, streams from `/api/chat`, hydrates history, disclaimer under composer).
 
-**Meeting Notes Summarizer (`/meetings`)** — Paste raw notes/transcript. Outputs editable: TL;DR, key decisions, action items (with owners), follow-ups. Save to history.
+**Root wiring**
+- Ensure `src/start.ts` registers `attachSupabaseAuth` in `functionMiddleware` so protected server fns receive the bearer.
+- Ensure `__root.tsx` has `onAuthStateChange` → `router.invalidate()` (identity events only).
 
-**AI Task Planner (`/tasks`)** — Input: goal + deadline + context. Outputs editable checklist of tasks with priority and estimated time. Save plan.
+## Verification
+- `tsgo` typecheck.
+- Manual: sign up → dashboard → run each tool → open chat → send a message → refresh thread.
 
-**AI Research Assistant (`/research`)** — Topic + depth (overview/deep-dive) + focus questions. Outputs editable structured report: summary, key findings, sources/considerations. Save.
-
-**AI Chatbot (`/chat` and `/chat/$threadId`)** — Threaded chats in sidebar list; new-thread button; route-driven active thread; messages persisted per thread in DB. Built on AI Elements (Conversation, Message, PromptInput, Shimmer, MessageResponse with markdown).
-
-All tool outputs render markdown and are editable in a textarea before saving.
-
-## Database (Lovable Cloud)
-- `profiles` (id→auth.users, display_name)
-- `chat_threads` (id, user_id, title, updated_at)
-- `chat_messages` (id, thread_id, user_id, role, parts jsonb, created_at)
-- `generations` (id, user_id, tool enum, title, input jsonb, output text, created_at) — used by the 4 non-chat tools for history
-- RLS scoped to `auth.uid()`; GRANTs to authenticated + service_role
-- Trigger to auto-create profile on signup
-
-## Server functions (`createServerFn` + `requireSupabaseAuth`)
-- `generateEmail`, `summarizeMeeting`, `planTasks`, `researchTopic` — call AI Gateway, save to `generations`, return output
-- `listGenerations(tool)`, `deleteGeneration(id)`
-- `listThreads`, `createThread`, `deleteThread`, `loadThreadMessages`
-- Chat streaming via `src/routes/api/chat.ts` server route using `streamText` + `toUIMessageStreamResponse({ originalMessages, onFinish })`; `onFinish` persists assistant message to the active thread
-
-## Design (Notion-style light)
-- Background `#ffffff`, surface `#f7f6f3`, text `#2f3437`, accent `#2383e2`
-- Inter for body, light borders, generous whitespace, subtle hover states
-- All colors via semantic tokens in `src/styles.css`
-- Mobile responsive: sidebar collapses to icon strip / offcanvas on small screens
-
-## Responsible AI
-- Persistent footer disclaimer on every tool: "AI-generated content may be inaccurate. Review before use."
-- Disclaimer also shown under chat composer
-
-## Out of scope (v1)
-- Real email sending / calendar integrations
-- File uploads / OCR of meeting recordings
-- Team workspaces / sharing
+## Notes
+- All AI calls go through Lovable AI Gateway (`google/gemini-3-flash-preview`).
+- All outputs render via `Markdown` component and are editable in a textarea before save.
+- Disclaimer appears on every tool page and chat.
