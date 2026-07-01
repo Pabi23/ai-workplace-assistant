@@ -89,6 +89,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Automate workplace tasks with AI: smart emails, meeting summaries, task planning, research briefings, and a productivity chatbot." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Workpilot — AI Workplace Productivity Assistant" },
+      { name: "twitter:description", content: "Automate workplace tasks with AI: smart emails, meeting summaries, task planning, research briefings, and a productivity chatbot." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ede546e4-a5d2-4289-ab4d-e8940e786db5/id-preview-823de8fc--0dbdb7c2-65f6-470b-9d4f-385e454eca20.lovable.app-1782878281500.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ede546e4-a5d2-4289-ab4d-e8940e786db5/id-preview-823de8fc--0dbdb7c2-65f6-470b-9d4f-385e454eca20.lovable.app-1782878281500.png" },
     ],
     links: [
       {
